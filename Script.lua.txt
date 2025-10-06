@@ -1,6 +1,6 @@
 --// 🚨 PET FINDER (Real Mutations Check)
 
-getgenv().webhook = ""
+getgenv().webhook = "https://discord.com/api/webhooks/1424896871452901377/87jv5xFnesNjgPHhufPz4-FK3gWQYKIkiFHK4eQYBX9TwViIu3gPO2Cu2kc05fW7Cpmd"
 
 getgenv().TargetPetNames = {
 
