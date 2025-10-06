@@ -1,0 +1,793 @@
+--// 🚨 PET FINDER (Real Mutations Check)
+
+getgenv().webhook = ""
+
+getgenv().TargetPetNames = {
+
+    "Cocofanto Elefanto",
+
+    "Tralalero Tralala",
+
+    "Odin Din Din Dun",
+
+    "Girafa Celestre",
+
+    "Trenostruzzo Turbo 3000",
+
+    "Matteo",
+
+    "Tigroligre Frutonni",
+
+    "Orcalero Orcala",
+
+    "Unclito Samito",
+
+    "Gattatino Nyanino",
+
+    "Espresso Signora",
+
+    "Ballerino Lololo",
+
+    "Piccione Macchina",
+
+    "Los Crocodillitos",
+
+    "Tukanno Bananno",
+
+    "Trippi Troppi Troppa Trippa",
+
+    "Los Tungtungtungcitos",
+
+    "Agarrini la Palini",
+
+    "Bulbito Bandito Traktorito",
+
+    "Los Orcalitos",
+
+    "Tipi Topi Taco",
+
+    "Bombardini Tortinii",
+
+    "Tralalita Tralala",
+
+    "Urubini Flamenguini",
+
+    "Alessio",
+
+    "Pakrahmatmamat",
+
+    "Los Bombinitos",
+
+    "Brr es Teh Patipum",
+
+    "Tartaruga Cisterna",
+
+    "Cacasito Satalito",
+
+    "Mastodontico Telepiedone",
+
+    "Crabbo Limonetta",
+
+    "Gattito Tacoto",
+
+    "Los Tipi Tacos",
+
+    "Antonio",
+
+    "Las Capuchinas",
+
+    "Orcalita Orcala",
+
+    "Piccionetta Macchina",
+
+    "Anpali Babel",
+
+    "Extinct Ballerina",
+
+    "Tractoro Dinosauro",
+
+    "Belula Beluga",
+
+    "Capi Taco",
+
+    "Dug dug dug",
+
+    "Corn Corn Corn Sahur",
+
+    "Brasilini Berimbini",
+
+    "Squalanana",
+
+    "Pop Pop Sahur",
+
+    "La Vacca Saturno Saturnita",
+
+    "Los Tralaleritos",
+
+    "Graipuss Medussi",
+
+    "La Grande Combinasion",
+
+    "Sammyni Spyderini",
+
+    "Garama and Madundung",
+
+    "Torrtuginni Dragonfrutini",
+
+    "Las Tralaleritas",
+
+    "Pot Hotspot",
+
+    "Nuclearo Dinossauro",
+
+    "Las Vaquitas Saturnitas",
+
+    "Chicleteira Bicicleteira",
+
+    "Los Combinasionas",
+
+    "Karkerkar Kurkur",
+
+    "Dragon Cannelloni",
+
+    "Los Hotspotsitos",
+
+    "Esok Sekolah",
+
+    "Nooo My Hotspot",
+
+    "Los Matteos",
+
+    "Job Job Job Sahur",
+
+    "Dul Dul Dul",
+
+    "Blackhole Goat",
+
+    "Los Spyderinis",
+
+    "Ketupat Kepat",
+
+    "La Supreme Combinasion",
+
+    "Bisonte Giuppitere",
+
+    "Guerriro Digitale",
+
+    "Ketchuru and Musturu",
+
+    "Spaghetti Tualetti",
+
+    "Los Nooo My Hotspotsitos",
+
+    "Trenostruzzo Turbo 4000",
+
+    "Fragola La La La",
+
+    "La Sahur Combinasion",
+
+    "La Karkerkar Combinasion",
+
+    "Tralaledon",
+
+    "Los Bros",
+
+    "Los Chicleteiras",
+
+    "Chachechi",
+
+    "Extinct Tralalero",
+
+    "Extinct Matteo",
+
+    "67",
+
+    "Las Sis",
+
+    "Celularcini Viciosini",
+
+    "La Extinct Grande",
+
+    "Quesadilla Crocodila",
+
+    "Tacorita Bicicleta",
+
+    "La Cucaracha",
+
+    "To to to Sahur",
+
+    "Mariachi Corazoni",
+
+    "Los Tacoritas",
+
+    "Tictac Sahur",
+
+    "Yess my examine",
+
+    "Karker Sahur",
+
+    "Noo my examine",
+
+    "Money Money Puggy",
+
+    "Los Primos",
+
+    "Tang Tang Keletang",
+
+    "Perrito Burrito",
+
+    "Chillin Chili",
+
+    "Los Tortus",
+
+    "Los Karkeritos",
+
+    "Los Jobcitos",
+
+    "Los 67",
+
+    "La Secret Combinasion",
+
+    "Burguro And Fryuro",
+
+    "Strawberry Elephant"
+
+}
+
+local HttpService = game:GetService("HttpService")
+
+local Workspace = game:GetService("Workspace")
+
+local Players = game:GetService("Players")
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Кэш найденных питомцев с временем
+
+local foundPetsCache = {}
+
+local lastFullReset = 0
+
+local RESET_INTERVAL = 10 -- секунд
+
+-- Кэш генерации питомцев
+
+local generationCache = {}
+
+-- Создаем таблицу для быстрого поиска
+
+local TARGET_PETS = {}
+
+for _, petName in ipairs(getgenv().TargetPetNames) do
+
+    TARGET_PETS[petName] = true
+
+end
+
+-- Функция для получения информации о генерации (с кэшированием)
+
+local function getPetGeneration(petName)
+
+    if generationCache[petName] then
+
+        return generationCache[petName]
+
+    end
+
+    
+
+    local generation = "Unknown"
+
+    pcall(function()
+
+        local datas = ReplicatedStorage:WaitForChild("Datas")
+
+        local animals = datas:WaitForChild("Animals")
+
+        local petData = require(animals)[petName]
+
+        if petData and petData.Generation then
+
+            generation = tostring(petData.Generation)
+
+            generationCache[petName] = generation
+
+        end
+
+    end)
+
+    
+
+    return generation
+
+end
+
+-- Функция для проверки реальных мутаций у питомца
+
+local function getPetMutations(petObject)
+
+    local mutations = {}
+
+    
+
+    -- Проверяем все возможные признаки мутаций
+
+    local function checkForMutations(obj)
+
+        -- Проверяем имя объекта
+
+        local name = obj.Name:lower()
+
+        
+
+        -- Проверяем стандартные мутации
+
+        if name:find("gold") then table.insert(mutations, "Gold") end
+
+        if name:find("diamond") then table.insert(mutations, "Diamond") end
+
+        if name:find("candy") then table.insert(mutations, "Candy") end
+
+        if name:find("rainbow") then table.insert(mutations, "Rainbow") end
+
+        if name:find("yin") or name:find("yang") then table.insert(mutations, "Yin Yang") end
+
+        if name:find("lava") then table.insert(mutations, "Lava") end
+
+        
+
+        -- Проверяем родительские объекты
+
+        if obj.Parent then
+
+            local parentName = obj.Parent.Name:lower()
+
+            if parentName:find("gold") and not table.find(mutations, "Gold") then table.insert(mutations, "Gold") end
+
+            if parentName:find("diamond") and not table.find(mutations, "Diamond") then table.insert(mutations, "Diamond") end
+
+            if parentName:find("candy") and not table.find(mutations, "Candy") then table.insert(mutations, "Candy") end
+
+            if parentName:find("rainbow") and not table.find(mutations, "Rainbow") then table.insert(mutations, "Rainbow") end
+
+            if (parentName:find("yin") or parentName:find("yang")) and not table.find(mutations, "Yin Yang") then table.insert(mutations, "Yin Yang") end
+
+            if parentName:find("lava") and not table.find(mutations, "Lava") then table.insert(mutations, "Lava") end
+
+        end
+
+        
+
+        -- Проверяем Configuration для мутаций
+
+        local config = obj:FindFirstChild("Configuration")
+
+        if config then
+
+            local mutationValue = config:FindFirstChild("Mutation")
+
+            if mutationValue then
+
+                local mutationType = tostring(mutationValue.Value)
+
+                if mutationType ~= "" and mutationType ~= "None" and not table.find(mutations, mutationType) then
+
+                    table.insert(mutations, mutationType)
+
+                end
+
+            end
+
+        end
+
+        
+
+        -- Проверяем все StringValue, IntValue, BoolValue в конфигурации
+
+        if config then
+
+            for _, value in ipairs(config:GetChildren()) do
+
+                if value:IsA("StringValue") or value:IsA("IntValue") or value:IsA("BoolValue") then
+
+                    local valueName = value.Name:lower()
+
+                    local valueData = tostring(value.Value):lower()
+
+                    
+
+                    if valueName:find("mutation") or valueName:find("variant") or valueName:find("type") then
+
+                        if valueData ~= "" and valueData ~= "none" and valueData ~= "normal" and valueData ~= "false" then
+
+                            local formattedMutation = valueData:gsub("^%l", string.upper)
+
+                            if not table.find(mutations, formattedMutation) then
+
+                                table.insert(mutations, formattedMutation)
+
+                            end
+
+                        end
+
+                    end
+
+                end
+
+            end
+
+        end
+
+    end
+
+    
+
+    -- Проверяем сам питомец и его родителей
+
+    checkForMutations(petObject)
+
+    
+
+    -- Убираем дубликаты
+
+    local uniqueMutations = {}
+
+    for _, mutation in ipairs(mutations) do
+
+        if not table.find(uniqueMutations, mutation) then
+
+            table.insert(uniqueMutations, mutation)
+
+        end
+
+    end
+
+    
+
+    return uniqueMutations
+
+end
+
+-- Предзагружаем генерации при запуске
+
+local function preloadGenerations()
+
+    for _, petName in ipairs(getgenv().TargetPetNames) do
+
+        getPetGeneration(petName)
+
+    end
+
+end
+
+-- Функция для получения join информации
+
+local function getJoinInfo()
+
+    local placeId = game.PlaceId
+
+    local jobId = game.JobId
+
+    local joinLink = "https://examplejoiner.vercel.app/"?placeid=".. placeId .. "gameInstanceid=" .. jobId"
+    
+    local joinScript = "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. placeId .. ', "' .. jobId .. '")'
+
+    return joinLink, joinScript
+
+end
+
+-- Функция для получения владельца плота
+
+local function getPlotOwner(plot)
+
+    local owner = "Unknown"
+
+    
+
+    for _, player in ipairs(Players:GetPlayers()) do
+
+        if plot.Name:find(player.Name) or plot.Name:find(tostring(player.UserId)) then
+
+            owner = player.Name
+
+            break
+
+        end
+
+    end
+
+    
+
+    return owner
+
+end
+
+-- Функция очистки устаревшего кэша
+
+local function cleanupOldCache()
+
+    local currentTime = tick()
+
+    local removedCount = 0
+
+    
+
+    for petKey, foundTime in pairs(foundPetsCache) do
+
+        if currentTime - foundTime > RESET_INTERVAL then
+
+            foundPetsCache[petKey] = nil
+
+            removedCount = removedCount + 1
+
+        end
+
+    end
+
+    
+
+    return removedCount
+
+end
+
+-- Функция отправки в вебхук (асинхронная)
+
+local function sendPetFound(petName, plotName, plotOwner, mutations)
+
+    local generation = getPetGeneration(petName)
+
+    local joinLink, joinScript = getJoinInfo()
+
+    
+
+    -- Формируем описание мутаций
+
+    local mutationText = "None"
+
+    if #mutations > 0 then
+
+        mutationText = table.concat(mutations, ", ")
+
+    end
+
+    
+
+    local data = {
+
+        username = "Finder",
+
+        embeds = {{
+
+            title = "🚨 " .. petName,
+
+            description = "**Generation:** " .. generation .. "/s\n**Mutations:** " .. mutationText,
+
+            color = 65280,
+
+            fields = {
+
+                {
+
+                    name = "👤 Owner",
+
+                    value = plotOwner,
+
+                    inline = true
+
+                },
+
+                {
+
+                    name = "📦 Plot",
+
+                    value = plotName,
+
+                    inline = true
+
+                },
+
+                {
+
+                    name = "🔗 Join Link",
+
+                    value = "[Click Here](" .. joinLink .. ")",
+
+                    inline = false
+
+                },
+
+                {
+
+                    name = "📜 Join Script",
+
+                    value = "```lua\n" .. joinScript .. "\n```",
+
+                    inline = false
+
+                },
+
+                {
+
+                    name = "🌐 Server Info",
+
+                    value = "Job ID: " .. game.JobId,
+
+                    inline = true
+
+                }
+
+            },
+
+            timestamp = DateTime.now():ToIsoDate()
+
+        }}
+
+    }
+
+    
+
+    local json = HttpService:JSONEncode(data)
+
+    
+
+    -- Асинхронная отправка без ожидания
+
+    coroutine.wrap(function()
+
+        pcall(function()
+
+            if syn and syn.request then
+
+                syn.request({
+
+                    Url = getgenv().webhook,
+
+                    Method = "POST",
+
+                    Headers = {
+
+                        ["Content-Type"] = "application/json"
+
+                    },
+
+                    Body = json
+
+                })
+
+            elseif request then
+
+                request({
+
+                    Url = getgenv().webhook,
+
+                    Method = "POST",
+
+                    Headers = {
+
+                        ["Content-Type"] = "application/json"
+
+                    },
+
+                    Body = json
+
+                })
+
+            else
+
+                HttpService:PostAsync(getgenv().webhook, json)
+
+            end
+
+        end)
+
+    end)()
+
+end
+
+-- Функция полного сканирования всех плотов
+
+local function fullScanAllPlots()
+
+    local plotsFolder = Workspace:FindFirstChild("Plots")
+
+    if not plotsFolder then return 0 end
+
+    local newPets = 0
+
+    
+
+    -- Сканируем ВСЕ плоты
+
+    for _, plot in ipairs(plotsFolder:GetChildren()) do
+
+        local plotOwner = getPlotOwner(plot)
+
+        
+
+        -- Сканируем всех потомков плота
+
+        local descendants = plot:GetDescendants()
+
+        for _, descendant in ipairs(descendants) do
+
+            if TARGET_PETS[descendant.Name] then
+
+                local mutations = getPetMutations(descendant)
+
+                local petKey = descendant.Name .. "_" .. plotOwner .. "_" .. plot.Name .. "_" .. table.concat(mutations, "_")
+
+                
+
+                if not foundPetsCache[petKey] then
+
+                    foundPetsCache[petKey] = tick() -- Сохраняем время находки
+
+                    sendPetFound(descendant.Name, plot.Name, plotOwner, mutations)
+
+                    newPets = newPets + 1
+
+                end
+
+            end
+
+        end
+
+    end
+
+    
+
+    return newPets
+
+end
+
+-- Основной цикл
+
+local function main()
+
+    preloadGenerations()
+
+    
+
+    while true do
+
+        local currentTime = tick()
+
+        
+
+        -- Проверяем нужно ли делать полный сброс
+
+        if currentTime - lastFullReset >= RESET_INTERVAL then
+
+            lastFullReset = currentTime
+
+            
+
+            -- Очищаем старый кэш
+
+            local removed = cleanupOldCache()
+
+            
+
+            -- Делаем полное сканирование ВСЕХ плотов
+
+            local newPets = fullScanAllPlots()
+
+        else
+
+            -- Быстрое сканирование только новых плотов (если есть)
+
+            pcall(fullScanAllPlots)
+
+        end
+
+        
+
+        wait(0.1) -- Быстрая проверка
+
+    end
+
+end
+
+-- Запускаем
+
+coroutine.wrap(main)()
